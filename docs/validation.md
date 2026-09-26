@@ -67,6 +67,6 @@ status `0xC000013A` before final evidence was written. Its signal source was not
 established. Incremental stage tracing was added; subsequent cleanup and the
 correctly scoped interrupt check completed successfully without isolation hacks.
 
-CI run links and final package verification are recorded in the release review
-after publication. A successful fixture test does not prove future Codex releases
-or every terminal emulator compatible.
+CI run links and package installation verification are recorded in the release
+review. A successful fixture test does not prove future Codex releases or every
+terminal emulator compatible.
