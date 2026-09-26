@@ -1,22 +1,26 @@
 {
   "name": "codex-quietline",
-  "version": "0.1.0",
-  "description": "A quiet, agent-aware terminal for Codex. Your conversation, subagents, and context in view.",
+  "version": "0.2.0",
+  "description": "The native Codex CLI with a quiet welcome and persistent subagent strip.",
   "type": "module",
   "bin": {
-    "codex-quietline": "dist/cli.js"
+    "codex-quietline": "bin/quietline.mjs"
   },
   "files": [
-    "dist",
+    "bin",
+    "lib",
+    "upstream.json",
+    "platforms.json",
     "LICENSE",
+    "NOTICE",
     "README.md",
     "CHANGELOG.md"
   ],
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22"
   },
   "author": "Berkay Caglar",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BerkayCaglar/codex-quietline.git"
@@ -25,40 +29,21 @@
   "homepage": "https://github.com/BerkayCaglar/codex-quietline#readme",
   "keywords": [
     "codex",
-    "terminal",
+    "cli",
     "tui",
     "subagents",
-    "statusline",
     "quietline"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "dev": "tsx src/cli.tsx",
-    "start": "node dist/cli.js",
-    "typecheck": "tsc --noEmit",
-    "test": "tsx --test test/*.test.ts test/*.test.tsx",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "check": "npm run typecheck && npm test && npm run build && npm run format:check",
-    "prepack": "npm run build",
-    "media": "tsx scripts/media.tsx"
+    "test": "node --test test/*.test.mjs",
+    "check": "node scripts/check.mjs && npm test",
+    "build:native": "node scripts/build.mjs",
+    "test:native": "node scripts/test-native.mjs",
+    "bundle": "node scripts/bundle.mjs",
+    "start": "node bin/quietline.mjs"
   },
   "dependencies": {
-    "ajv": "8.20.0",
     "cross-spawn": "7.0.6",
-    "ink": "7.1.1",
-    "react": "19.3.0",
-    "string-width": "8.3.0",
-    "wrap-ansi": "10.0.2"
-  },
-  "devDependencies": {
-    "@resvg/resvg-js": "2.6.2",
-    "@types/cross-spawn": "6.0.6",
-    "@types/node": "26.6.3",
-    "@types/react": "19.3.0",
-    "ink-testing-library": "4.0.0",
-    "prettier": "3.9.9",
-    "tsx": "4.23.15",
-    "typescript": "7.0.2"
+    "tar": "7.5.22"
   }
 }

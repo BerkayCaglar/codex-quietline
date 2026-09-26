@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0 — Native CLI
+
+- Replace the independent TypeScript client with the native Codex CLI fork.
+- Preserve the real slash picker, commands, input handling and execution engine.
+- Center the fresh-session welcome and add a static Quietline mark.
+- Show only subagents under the composer; keep model/context in the native footer.
+- Route Alt+Up/Down through native agent navigation.
+- Add complete native platform bundles, verified installation, reversible `codex`
+  PATH activation and a fork-aware update path.
+- Preserve existing Windows database compatibility through target-correct SQL
+  build bytes without modifying user data or migration guards.
+
 ## 0.1.0 — 2026-09-26
 
 First release of the independent Codex terminal client.

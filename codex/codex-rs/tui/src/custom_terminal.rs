@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: keep synthetic terminal resize state consistent in tests.
 // This is derived from `ratatui::Terminal`, which is licensed under the following terms:
 //
 // The MIT License (MIT)
@@ -312,6 +313,10 @@ where
     /// of the screen.
     pub fn resize(&mut self, screen_size: Size) -> io::Result<()> {
         self.last_known_screen_size = screen_size;
+        #[cfg(test)]
+        if let Some(size) = self.screen_size_override.as_mut() {
+            *size = screen_size;
+        }
         Ok(())
     }
 

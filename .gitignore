@@ -3,6 +3,9 @@ dist/
 coverage/
 *.tgz
 .agent-tmp/
+release-out/
+.native-target/
+.test-target/
 .env
 .env.*
 !.env.example

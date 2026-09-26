@@ -1,0 +1,16 @@
+---
+source: tui/src/quietline_tests.rs
+expression: text(&buffer)
+---
+
+
+
+
+                 ╭─────╮
+                 │  q  │
+                 ╰──╮  │
+                    ╰──╯
+                quietline
+
+     Your Codex. Everything in view.
+       / commands · Alt+↑/↓ agents

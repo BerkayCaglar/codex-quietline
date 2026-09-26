@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! Informational, warning, update, and policy notice history cells.
 
 use super::*;
@@ -39,7 +40,7 @@ impl HistoryCell for UpdateAvailableHistoryCell {
         } else {
             line![
                 "See ",
-                "https://github.com/openai/codex"
+                "https://github.com/BerkayCaglar/codex-quietline"
                     .fg(accent_color())
                     .underlined(),
                 " for installation options."
@@ -56,7 +57,7 @@ impl HistoryCell for UpdateAvailableHistoryCell {
             update_instruction,
             "",
             "See full release notes:",
-            "https://github.com/openai/codex/releases/latest"
+            crate::update_action::RELEASE_NOTES_URL
                 .fg(accent_color())
                 .underlined(),
         ];
@@ -73,7 +74,8 @@ impl HistoryCell for UpdateAvailableHistoryCell {
         let update_instruction = if let Some(update_action) = self.update_action {
             format!("Run {} to update.", update_action.command_str())
         } else {
-            "See https://github.com/openai/codex for installation options.".to_string()
+            "See https://github.com/BerkayCaglar/codex-quietline for installation options."
+                .to_string()
         };
         vec![
             Line::from("Update available!"),
@@ -81,7 +83,7 @@ impl HistoryCell for UpdateAvailableHistoryCell {
             Line::from(update_instruction),
             Line::from(""),
             Line::from("See full release notes:"),
-            Line::from("https://github.com/openai/codex/releases/latest"),
+            Line::from(crate::update_action::RELEASE_NOTES_URL),
         ]
     }
 

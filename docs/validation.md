@@ -1,72 +1,43 @@
-# Validation
+# Native validation
 
-## Reproducible checks
+## Commands
 
 ```sh
 npm ci
 npm run check
-npm run media
-npm pack --dry-run
+npm run test:native -- -p codex-tui -p codex-cli --cargo-profile dev-small
 ```
 
-The offline suite covers JSON-RPC correlation and timeouts, UTF-8 framing, owned
-process cleanup, real fake-server integration, native-child ancestry, snapshot
-and live-event ordering, per-agent drafts, keyboard input, approval ownership,
-secret masking and bounded terminal rendering. CI runs this suite on Node 22 and
-24 on Windows, macOS and Linux. No inference runs in CI.
+Use `npm run build:native` from the root for release builds. Follow CONTRIBUTING.md
+to bundle and install into an isolated `QUIETLINE_HOME`. Real-terminal acceptance
+uses `--no-daemon` so it does not replace or restart another session's shared daemon.
 
-## Installed Codex
+Check the fresh welcome, `/` command picker, `/model` cancellation, subagent-only
+strip, native switching and exit cleanup. Do not treat a `--help` invocation as a
+live UI check. Native model calls are separate, explicit acceptance checks; CI
+does not use an account or consume model usage.
 
-```sh
-codex-quietline --doctor
-npx tsx scripts/smoke.ts
-```
+## Development findings
 
-Doctor checks handshake, account state and model catalog without starting a turn.
-The smoke script also starts a read-only thread and checks discovery. It stores
-local evidence in ignored `.agent-tmp/` files.
+- Source import is pinned to `rust-v0.157.1`, commit recorded in `upstream.json`.
+- The lockfile's internal 0.0.0 workspace versions were reconciled. No external
+  dependency updates were used to get past `--locked`.
+- A first live launch reported migration checksum mismatch. Read-only comparison
+  established that all 57 existing state migrations match the original Windows
+  CRLF source bytes. Preparing the fork's build inputs restores that compatibility;
+  no database, checksum row or migration guard was modified.
+- Independent reviews found and fixed the external-writer strip bypass, owned
+  renderer return/layout mismatch, updater downgrade, Windows updater dispatch,
+  symlinked shell-profile replacement, multi-shell cleanup and signal propagation.
+- Live Windows input opened the native `/` picker and `/model` dialog, cancelled
+  the dialog and exited cleanly. It also exposed a composite startup header that
+  the first snapshots missed; the header-free path now preserves its other notices.
+- The first full local run completed 5,864 tests: 5,802 passed, 61 failed, one
+  timed out, and 11 skipped. This is retained as a failed run, not acceptance.
+  Failures included version-dependent snapshots, inherited terminal settings,
+  locale/path assumptions, eight stack overflows and one worktree timeout.
+  The test launcher isolates ANSI/terminal identity, and presentation fixtures
+  use stable version and path/number representations. Final reruns remain required.
 
-Live tests are explicit because they consume account usage:
-
-```sh
-npx tsx scripts/smoke.ts --live
-npx tsx scripts/smoke.ts --live --interrupt
-```
-
-The first asks for two short native subagent tasks and verifies conversation
-hydration. The second interrupts a real running child. Both close their own
-server. Neither grants approvals. They must not be run against a sensitive
-workspace or included in unattended CI.
-
-## Initial release evidence
-
-Environment: Windows 11, Node 24.20.0, Codex CLI 0.157.1.
-
-- Doctor: real stdio handshake, existing authentication and seven catalog models
-  returned successfully. Credentials and account identity are not retained.
-- Two-child live smoke: passed; both actual child threads were discovered and
-  their conversation content was hydrated. Both reported direct input disabled.
-- Child-interrupt live smoke: passed; the real child accepted the interrupt and
-  emitted an interrupted turn. The private server then closed successfully.
-- Offline release suite: 31 tests passed on the local Windows environment.
-- Native terminal: demo navigation selected a child and changed the conversation;
-  quitting restored the original terminal buffer and cursor.
-- UI images: generated from the shipped React renderer at 116 and 60 columns;
-  overview and compact PNGs visually inspected.
-- Independent protocol/lifecycle and input/layout reviews produced actionable
-  findings, tracked in [the release review](reviews/0.1.0.md).
-
-Failures retained during development: model selection initially used resume on a
-new thread without a persisted rollout; fixed by the owning settings-update API.
-A live-smoke completion predicate initially depended on a display label that
-canonical items overwrote; fixed with a separate terminal turn status and tests.
-The initial interrupt script incorrectly waited for the parent to finish after
-the child was interrupted; it now asserts the child's interrupted event and closes
-its test server. One earlier interrupt experiment exited with Windows control-C
-status `0xC000013A` before final evidence was written. Its signal source was not
-established. Incremental stage tracing was added; subsequent cleanup and the
-correctly scoped interrupt check completed successfully without isolation hacks.
-
-CI run links and package installation verification are recorded in the release
-review. A successful fixture test does not prove future Codex releases or every
-terminal emulator compatible.
+Raw runs are retained under ignored `.agent-tmp/`. The release review records final
+test counts, native interaction evidence and CI/release links after verification.

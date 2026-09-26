@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! The bottom pane is the interactive footer of the chat UI.
 //!
 //! The pane owns the [`ChatComposer`] (editable prompt input) and a stack of transient
@@ -314,6 +315,7 @@ pub(crate) struct BottomPane {
     pending_input_preview: PendingInputPreview,
     /// Inactive threads with pending approval requests.
     pending_thread_approvals: PendingThreadApprovals,
+    quietline_agents: crate::quietline::AgentStrip,
     context_window_percent: Option<i64>,
     context_window_used_tokens: Option<i64>,
     keymap: RuntimeKeymap,
@@ -385,6 +387,7 @@ impl BottomPane {
             unified_exec_footer: UnifiedExecFooter::new(),
             pending_input_preview: PendingInputPreview::new(),
             pending_thread_approvals: PendingThreadApprovals::new(),
+            quietline_agents: crate::quietline::AgentStrip::default(),
             esc_backtrack_hint: false,
             animations_enabled,
             effects,
@@ -2211,6 +2214,7 @@ impl BottomPane {
                 && (has_status_or_footer
                     || has_inline_previews
                     || self.inline_banner.is_some()
+                    || !self.quietline_agents.is_empty()
                     || question_summary.is_some())
             {
                 options.command_popup_placement = CommandPopupPlacement::AboveComposer;
@@ -2251,6 +2255,7 @@ impl BottomPane {
                 }))
             };
             flex2.push(/*flex*/ 0, composer);
+            flex2.push(/*flex*/ 1, self.quietline_agents_renderable());
             RenderableItem::Owned(Box::new(flex2))
         }
     }
@@ -2297,6 +2302,16 @@ impl BottomPane {
         if self.composer.set_active_agent_label(active_agent_label) {
             self.request_redraw();
         }
+    }
+
+    pub(crate) fn set_quietline_agents(&mut self, rows: Vec<crate::quietline::AgentRow>) {
+        if self.quietline_agents.set_rows(rows) {
+            self.request_redraw();
+        }
+    }
+
+    pub(crate) fn quietline_agents_renderable(&self) -> RenderableItem<'_> {
+        RenderableItem::Borrowed(&self.quietline_agents)
     }
 
     pub(crate) fn set_side_conversation_context_label(&mut self, label: Option<String>) {

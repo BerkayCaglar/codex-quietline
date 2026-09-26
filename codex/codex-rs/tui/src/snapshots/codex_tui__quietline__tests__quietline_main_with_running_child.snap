@@ -1,0 +1,9 @@
+---
+source: tui/src/quietline_tests.rs
+expression: text(&buffer)
+---
+  task_3 · closed
+  task_4 · closed
+  task_5 · closed
+  task_6 · working
+  4–7 / 7 agents · Alt+↑/↓ · /subagents

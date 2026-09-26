@@ -1,44 +1,54 @@
-# Architecture
+# Native architecture
 
-Quietline is an independent terminal client of the official Codex App Server.
-It owns one private stdio server and is the only interactive client of that
-server. The Codex executable, account, configuration, tools, permissions, agent
-execution and durable conversations remain owned by Codex.
+Quietline 0.2 replaces the independent 0.1 terminal client with a maintained fork
+of Codex's Rust TUI. Native Codex owns every interactive command, composer state,
+approval, agent navigation, session, backend connection and execution policy.
 
-## Boundaries
+## Source and presentation
 
-- `protocol`: JSON-RPC framing, request correlation, timeout and child lifecycle.
-- `session`: server operations and event reduction into one store; UI never
-  invents agent states from elapsed time, terminal output or file timestamps.
-- `ui`: bounded terminal layout, conversation viewport, composer, persistent
-  agent rows, explicit approvals and keyboard focus.
-- Presentation receives state. It does not start tools or change permissions.
+`upstream.json` pins the imported source. `codex/codex-rs/tui/src/quietline.rs`
+contains pure presentation. `app/quietline.rs` derives rows from the existing
+`AgentNavigationState` and reuses the existing fresh-conversation latch.
 
-Thread IDs identify conversations. Parent IDs identify ancestry. Switching the
-selected row never starts a turn or interrupts an agent. Drafts and viewport
-positions belong to individual threads. Server requests retain their own IDs
-and originating thread, independently of the selected conversation.
+The strip excludes the primary thread, remains bounded, and keeps selected agents
+visible. It uses native status and selection; it does not collect a parallel cache
+of model/context information. Model and context remain in the native status line.
+Alt+Up/Down aliases route through the existing native agent-switch path.
 
-## Compatibility
+The static welcome is painted in transient terminal space, never inserted into
+history or model context. Owned-screen rendering keeps the native bottom pane and
+footer composition. Inline mode uses native resize reflow when leaving the fresh
+full-height viewport. Modals and command popups retain their own rendering/input.
 
-The initial protocol baseline is Codex CLI 0.157.1. Experimental negotiation is
-used for direct-input capability detection and descendant filtering. Optional
-fields stay optional. Missing context or cache data is displayed as unavailable,
-never estimated from a timer. Unknown actionable requests fail explicitly;
-they are never silently approved. Client reconnect never resends a user prompt.
+## Distribution
 
-The UI is not an overlay that scrapes the stock CLI or simulates keystrokes.
-An independent renderer makes the persistent agent strip possible and avoids
-two clients competing to answer one approval. It also means native Codex slash
-commands must not be assumed to exist here; Quietline documents its own commands.
+The bootstrap passes arguments and inherited stdio to the native entrypoint.
+`platforms.json` owns supported platform triples and CI runners. Release bundles
+retain the complete matching official platform payload, then replace only Codex
+itself and stamp the fork package identity. Helper binaries and resource trees stay
+version-aligned with the pinned backend source.
 
-## Delivery gates
+Setup installs into a versioned user directory and activates managed `codex`
+launchers ahead of the original installation on PATH. It does not overwrite the
+official npm package or authentication/configuration. Deactivation removes only
+owned activation. `QUIETLINE_HOME` can isolate a source-build installation.
 
-- Type checking and deterministic protocol/state/input/render tests.
-- Fake-server process tests exercise transport and real request ownership.
-- A real installed-Codex smoke check validates handshake and protocol responses.
-- Terminal smoke checks exercise navigation, resize and cleanup.
-- CI repeats offline checks on Windows, macOS and Linux, with Node 22 and 24.
-- npm pack inspection excludes credentials, session logs and local evidence.
+Native update owners query Quietline releases and invoke the fork's upgrade path.
+The updater cache is separate from stock Codex. Upgrades prepare the new native
+payload before updating the bootstrap; the shared daemon remains a separate native
+operation with its original source labels.
 
-No telemetry, credential copying, automatic approval, or automatic compaction.
+## Build compatibility
+
+The release tag has workspace version 0.157.1 while its lockfile originally lists
+internal crates as 0.0.0. The fork reconciles only those workspace versions; external
+dependencies stay pinned. The native version includes `+quietline.<release>` and
+the bootstrap verifies agreement with its own release version.
+
+SQLx migration hashes include source line endings. Official Windows migration
+bytes use CRLF, while Unix uses LF. Build preparation reproduces those bytes before
+embedding. It does not alter SQL statements or relax database validation. This is
+required for opening existing Codex databases without touching their contents.
+
+The 0.1 review and [validation record](validation-0.1.md) are historical; their
+TypeScript client modules are no longer part of the current architecture.

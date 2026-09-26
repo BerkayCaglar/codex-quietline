@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! Shared composer and live-history composition for inline and owned transcript surfaces.
 
 use super::transcript::ActiveCellLayoutCache;
@@ -219,10 +220,19 @@ impl ChatWidget {
                 )),
             ))
         } else if self.external_writer_view && !self.bottom_pane.has_active_view() {
-            RenderableItem::Owned(Box::new(ExternalWriterNotice {
-                command_center_available: self.remote_connection.is_some(),
-                transcript_hint: self.bottom_pane.transcript_shortcut_hint(),
-            }))
+            let mut flex = FlexRenderable::new();
+            flex.push(
+                /*flex*/ 0,
+                RenderableItem::Owned(Box::new(ExternalWriterNotice {
+                    command_center_available: self.remote_connection.is_some(),
+                    transcript_hint: self.bottom_pane.transcript_shortcut_hint(),
+                })),
+            );
+            flex.push(
+                /*flex*/ 1,
+                self.bottom_pane.quietline_agents_renderable(),
+            );
+            RenderableItem::Owned(Box::new(flex))
         } else {
             let right_reserve = if self
                 .bottom_pane

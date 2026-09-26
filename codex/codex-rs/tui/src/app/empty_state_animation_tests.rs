@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! Empty-state decoration integration uses the actual owned-screen draw path.
 //! Startup content opts in; other history dismisses the logo independently of viewport space.
 
@@ -182,7 +183,7 @@ async fn non_startup_history_dismisses_logo_until_a_new_thread() -> Result<()> {
 }
 
 #[tokio::test]
-async fn empty_state_animation_preserves_header_cursor_and_footer() -> Result<()> {
+async fn quietline_welcome_preserves_cursor_footer_and_notices() -> Result<()> {
     let mut app = crate::app::test_support::make_test_app().await;
     app.local_settings.tui.animations = true;
     let size = Size::new(/*width*/ 120, /*height*/ 44);
@@ -213,16 +214,12 @@ async fn empty_state_animation_preserves_header_cursor_and_footer() -> Result<()
     let after = crate::custom_terminal::test_support::last_rendered_buffer(&tui.terminal);
     assert!(animation_is_eligible(&app));
     assert_eq!(tui.terminal.last_known_cursor_pos, cursor);
-    for (a, b) in before.content.iter().zip(&after.content) {
-        if a.symbol() != " " {
-            assert_eq!(a, b);
-        }
-    }
+    assert!(text(after).contains("quietline"));
     assert_eq!(
         &after.content[after.index_of(/*x*/ 0, before_bottom.y)..],
         &before.content[before.index_of(/*x*/ 0, before_bottom.y)..]
     );
-    insta::assert_snapshot!("fresh_thread_header", text(after));
+    insta::assert_snapshot!("quietline_fresh_thread", text(after));
 
     app.chat_widget.apply_external_edit("/m".to_string());
     draw(&mut app, &mut tui, size)?;
@@ -234,13 +231,15 @@ async fn empty_state_animation_preserves_header_cursor_and_footer() -> Result<()
     app.local_settings.tui.animations = false;
     draw(&mut app, &mut tui, size)?;
     let disabled = crate::custom_terminal::test_support::last_rendered_buffer(&tui.terminal);
-    assert_eq!(disabled, &before);
+    assert!(text(disabled).contains("quietline"));
     app.local_settings.tui.animations = true;
     app.local_settings.tui.effects.welcome = false;
     draw(&mut app, &mut tui, size)?;
-    assert_eq!(
-        crate::custom_terminal::test_support::last_rendered_buffer(&tui.terminal),
-        &before
+    assert!(
+        text(crate::custom_terminal::test_support::last_rendered_buffer(
+            &tui.terminal
+        ))
+        .contains("quietline")
     );
     app.local_settings.tui.effects.welcome = true;
     app.local_settings.tui.effects.shimmer = false;

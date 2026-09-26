@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! The blossom welcome animation for onboarding, with a full-color final pose.
 //! Visible time pauses while hidden; conversation lifecycle tracking is retained for the header.
 
@@ -45,6 +46,10 @@ pub(crate) struct EmptyStateAnimation {
 }
 
 impl EmptyStateAnimation {
+    pub(crate) fn is_eligible(&self) -> bool {
+        self.eligible
+    }
+
     pub(crate) fn start_fresh(&mut self) {
         self.eligible = true;
         self.spin_elapsed = Duration::ZERO;

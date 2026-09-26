@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! Helpers for rendering and navigating multi-agent state in the TUI.
 //!
 //! This module owns the shared presentation contracts for multi-agent history rows, `/subagents`
@@ -118,6 +119,7 @@ pub(crate) fn previous_agent_shortcut_matches(
     allow_word_motion_fallback: bool,
 ) -> bool {
     previous_agent_shortcut().is_press(key_event)
+        || crate::key_hint::alt(KeyCode::Up).is_press(key_event)
         || previous_agent_word_motion_fallback(key_event, allow_word_motion_fallback)
 }
 
@@ -128,6 +130,7 @@ pub(crate) fn next_agent_shortcut_matches(
     allow_word_motion_fallback: bool,
 ) -> bool {
     next_agent_shortcut().is_press(key_event)
+        || crate::key_hint::alt(KeyCode::Down).is_press(key_event)
         || next_agent_word_motion_fallback(key_event, allow_word_motion_fallback)
 }
 

@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! Status output and setup controls for `ChatWidget`.
 //!
 //! Rendering details live in `status_surfaces`; this module owns the mutable
@@ -97,6 +98,10 @@ impl ChatWidget {
     /// user actually looking at?" and the footer stack remains a pure renderer of that decision.
     pub(crate) fn set_active_agent_label(&mut self, active_agent_label: Option<String>) {
         self.bottom_pane.set_active_agent_label(active_agent_label);
+    }
+
+    pub(crate) fn set_quietline_agents(&mut self, rows: Vec<crate::quietline::AgentRow>) {
+        self.bottom_pane.set_quietline_agents(rows);
     }
 
     /// Recomputes footer status-line content from config and current runtime state.

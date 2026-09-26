@@ -1,6 +1,0 @@
-node_modules
-dist
-coverage
-.agent-tmp
-package-lock.json
-docs/media

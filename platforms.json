@@ -1,0 +1,7 @@
+{
+  "win32-x64": { "triple": "x86_64-pc-windows-msvc", "runner": "windows-2025" },
+  "linux-x64": { "triple": "x86_64-unknown-linux-musl", "runner": "ubuntu-24.04" },
+  "linux-arm64": { "triple": "aarch64-unknown-linux-musl", "runner": "ubuntu-24.04-arm" },
+  "darwin-x64": { "triple": "x86_64-apple-darwin", "runner": "macos-15-intel" },
+  "darwin-arm64": { "triple": "aarch64-apple-darwin", "runner": "macos-15" }
+}

@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! Compose the owned transcript above the composer and route their selection gestures.
 //! Reserve a cleared row below activity and previews, immediately above the composer.
 //! Slash suggestions overlay already-painted rows so opening or closing them leaves transcript
@@ -65,6 +66,8 @@ impl App {
         screen_size: Size,
     ) -> Result<Rect> {
         self.chat_widget.sync_warnings(&self.transcript_cells);
+        self.sync_quietline_agents();
+        let quietline_content = self.quietline_startup_content(screen_size.width);
         let motion = MotionMode::from_animations_enabled(
             self.local_settings.tui.animations && self.local_settings.tui.effects.shimmer,
         );
@@ -149,6 +152,26 @@ impl App {
                 frame.buffer,
                 &self.transcript_cells,
             );
+            if let Some(lines) = &quietline_content {
+                let warning_height = lines.len().min(usize::from(available)) as u16;
+                if available.saturating_sub(warning_height) >= 4 {
+                    let stage = Rect::new(/*x*/ 0, /*y*/ 0, transcript_width, available);
+                    ratatui::widgets::Clear.render(stage, frame.buffer);
+                    ratatui::widgets::Paragraph::new(lines.clone()).render(
+                        Rect::new(/*x*/ 0, /*y*/ 0, transcript_width, warning_height),
+                        frame.buffer,
+                    );
+                    crate::quietline::render_welcome(
+                        Rect::new(
+                            /*x*/ 0,
+                            warning_height,
+                            transcript_width,
+                            available - warning_height,
+                        ),
+                        frame.buffer,
+                    );
+                }
+            }
             if let Some(gap) = composer_gap.as_mut() {
                 gap.needs_separator = available > 1
                     && chat_widget.no_modal_or_popup_active()

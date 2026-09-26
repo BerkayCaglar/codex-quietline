@@ -1,0 +1,11 @@
+OpenAI Codex
+Copyright 2025 OpenAI
+
+This project includes code derived from [Ratatui](https://github.com/ratatui/ratatui), licensed under the MIT license.
+Copyright (c) 2016-2022 Florian Dehau
+Copyright (c) 2023-2025 The Ratatui Developers
+
+Codex Quietline
+Copyright 2026 Berkay Caglar
+This distribution modifies the native Codex terminal presentation and update integration.
+The upstream source revision is recorded in upstream.json. Original notices are retained under codex/.

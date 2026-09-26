@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! Top-level TUI application state and runtime wiring.
 //!
 //! This module owns the `App` struct, shared imports, and the high-level run loop that coordinates
@@ -232,6 +233,7 @@ mod managed_worktree_creation;
 mod misalignment_policy;
 mod model_defaults;
 mod new_session;
+mod quietline;
 pub(crate) use new_session::has_launch_setting;
 mod native_history;
 mod owned_transcript;
@@ -1167,11 +1169,15 @@ impl App {
     }
 
     fn render_chat_widget_frame(&mut self, tui: &mut tui::Tui, screen_size: Size) -> Result<Rect> {
+        self.sync_quietline_agents();
         self.sync_thread_title_progress();
         self.chat_widget
             .set_sparkle_terminal_focus(tui.is_terminal_focused());
         if tui.is_owned_screen() {
             return self.render_owned_transcript(tui, screen_size);
+        }
+        if let Some(area) = self.render_quietline_welcome(tui, screen_size)? {
+            return Ok(area);
         }
         self.chat_widget
             .empty_state_animation

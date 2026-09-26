@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 use super::*;
 use crate::chatwidget::tests::make_chatwidget_manual_with_sender;
 use pretty_assertions::assert_eq;
@@ -263,6 +264,43 @@ async fn external_writer_view_shows_notice_instead_of_composer() {
     );
     assert_eq!(frame[(5, 5)].modifier, ratatui::style::Modifier::empty());
     assert!(!widget.bottom_pane.composer_input_enabled());
+}
+
+#[tokio::test]
+async fn quietline_agent_strip_survives_read_only_views() {
+    for view in ["parent_owned", "external_writer"] {
+        let (mut widget, _sender, _events, _operations) =
+            make_chatwidget_manual_with_sender().await;
+        widget.set_quietline_agents(vec![crate::quietline::AgentRow {
+            label: "Survey [explorer]".to_string(),
+            running: true,
+            closed: false,
+            selected: true,
+        }]);
+        if view == "parent_owned" {
+            widget.set_parent_owned_thread();
+        } else {
+            widget.show_external_writer_thread();
+        }
+        let frame = render_frame(&widget, /*width*/ 80);
+        let rows = frame
+            .content
+            .chunks(80)
+            .map(|row| {
+                row.iter()
+                    .map(ratatui::buffer::Cell::symbol)
+                    .collect::<String>()
+                    .trim_end()
+                    .to_string()
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert!(rows.contains("Survey [explorer]"));
+        insta::assert_snapshot!(
+            format!("quietline_{view}_strip"),
+            crate::chatwidget::tests::normalize_snapshot_paths(rows)
+        );
+    }
 }
 
 #[tokio::test]

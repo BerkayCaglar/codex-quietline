@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! Session headers, onboarding guidance, and transcript cards.
 
 use super::*;
@@ -125,6 +126,26 @@ impl HistoryCell for SessionNoticeCell {
 
 #[derive(Debug)]
 pub struct SessionInfoCell(CompositeHistoryCell);
+
+impl SessionInfoCell {
+    /// Retain startup tips and model-change notices when a welcome surface replaces the header.
+    pub(crate) fn startup_notice_lines(&self, width: u16) -> Vec<Line<'static>> {
+        let mut lines = Vec::new();
+        for part in &self.0.parts {
+            if part.as_any().is::<SessionHeaderHistoryCell>() {
+                continue;
+            }
+            let part_lines = part.display_lines(width);
+            if !part_lines.is_empty() {
+                if !lines.is_empty() {
+                    lines.push(Line::default());
+                }
+                lines.extend(part_lines);
+            }
+        }
+        lines
+    }
+}
 
 impl HistoryCell for SessionInfoCell {
     fn compact_hyperlink_lines(&self, width: u16) -> Vec<HyperlinkLine> {

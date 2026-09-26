@@ -1,2 +1,6 @@
 * text=auto eol=lf
+# Preserve upstream checkout conventions. Windows SQLx migration checksums include CRLF.
+codex/** !eol
+# VT100 snapshots retain the highlighted row's trailing cells.
+codex/**/*.snap whitespace=-blank-at-eol
 *.png binary

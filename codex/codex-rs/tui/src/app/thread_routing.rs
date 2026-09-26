@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! Thread routing, buffering, and app-server operation submission for the TUI app.
 //!
 //! This module manages active thread channels, routes server requests and notifications into those
@@ -1285,6 +1286,9 @@ impl App {
             self.mark_agent_picker_thread_closed(thread_id);
         } else if turn_stopped {
             self.agent_navigation.mark_stopped(thread_id);
+        }
+        if is_turn_started || is_thread_closed || turn_stopped {
+            self.sync_quietline_agents();
         }
 
         // Settings snapshots do not belong in the transcript queue: apply them in receive order.

@@ -1,0 +1,76 @@
+name: Native packages
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  platforms:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.matrix.outputs.value }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - id: matrix
+        run: echo "value=$(node scripts/matrix.mjs)" >> "$GITHUB_OUTPUT"
+  build:
+    needs: platforms
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.platforms.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    env:
+      CARGO_TARGET_DIR: ${{ github.workspace }}/.native-target
+      CARGO_INCREMENTAL: '0'
+      CARGO_BUILD_JOBS: '2'
+      CARGO_PROFILE_RELEASE_DEBUG: '0'
+    steps:
+      - run: git config --global core.longpaths true
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 22
+          cache: npm
+      - name: Prepare Linux build dependencies and disk
+        if: runner.os == 'Linux'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo apt-get update -qq
+          sudo apt-get install -y cmake
+      - name: Install Zig for the upstream musl toolchain
+        if: runner.os == 'Linux'
+        uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29
+        with:
+          version: 0.14.0
+          use-cache: false
+      - name: Prepare upstream musl dependencies
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          TARGET: ${{ matrix.triple }}
+        run: |
+          bash codex/.github/scripts/install-musl-build-tools.sh
+          echo 'AWS_LC_SYS_NO_JITTER_ENTROPY=1' >> "$GITHUB_ENV"
+      - name: Install pinned Rust
+        run: rustup toolchain install 1.95.0 --profile minimal --target ${{ matrix.triple }}
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            .native-target
+          key: native-${{ matrix.key }}-${{ hashFiles('codex/codex-rs/Cargo.lock') }}
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build:native -- --target ${{ matrix.triple }}
+      - name: Bundle complete native distribution
+        shell: bash
+        run: |
+          binary="$CARGO_TARGET_DIR/${{ matrix.triple }}/release/codex"
+          if [ "$RUNNER_OS" = Windows ]; then binary="$binary.exe"; fi
+          npm run bundle -- --binary "$binary"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: native-${{ matrix.key }}
+          path: release-out/*
+          if-no-files-found: error

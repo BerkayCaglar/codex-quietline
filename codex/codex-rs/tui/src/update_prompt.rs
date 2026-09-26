@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! Shared picker presentation for the installed CLI's update choices.
 //! Update discovery and execution remain disabled in debug builds.
 
@@ -39,7 +40,7 @@ use ratatui::widgets::Wrap;
 #[cfg(not(debug_assertions))]
 use tokio_stream::StreamExt;
 
-const RELEASE_NOTES_URL: &str = "https://github.com/openai/codex/releases/latest";
+const RELEASE_NOTES_URL: &str = crate::update_action::RELEASE_NOTES_URL;
 
 #[cfg(not(debug_assertions))]
 pub(crate) enum UpdatePromptOutcome {

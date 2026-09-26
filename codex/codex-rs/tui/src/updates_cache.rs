@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 use crate::legacy_core::config::Config;
 use chrono::DateTime;
 use chrono::Utc;
@@ -15,7 +16,7 @@ pub(crate) struct VersionInfo {
     pub(crate) dismissed_version: Option<String>,
 }
 
-const VERSION_FILENAME: &str = "version.json";
+const VERSION_FILENAME: &str = "quietline-version.json";
 
 pub(crate) fn version_filepath(config: &Config) -> PathBuf {
     config.codex_home.join(VERSION_FILENAME).into_path_buf()

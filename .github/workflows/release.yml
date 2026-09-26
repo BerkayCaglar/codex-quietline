@@ -4,12 +4,13 @@ on:
     tags: ['v*']
 permissions:
   contents: write
+  actions: read
 jobs:
-  package:
-    runs-on: ubuntu-latest
+  publish:
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: 22
           cache: npm
@@ -17,8 +18,19 @@ jobs:
       - run: npm run check
       - name: Check tag matches package version
         run: node -e "if ('v' + require('./package.json').version !== process.env.GITHUB_REF_NAME) process.exit(1)"
-      - run: npm pack
-      - name: Publish release package
+      - name: Fetch verified native artifacts from this exact commit
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" codex-quietline-*.tgz --verify-tag --generate-notes --title "$GITHUB_REF_NAME"
+        run: |
+          run_id=$(gh run list --workflow ci.yml --commit "$GITHUB_SHA" --event push --status success --json databaseId --jq '.[0].databaseId')
+          test -n "$run_id" && test "$run_id" != null
+          gh run download "$run_id" --pattern 'native-*' --dir .agent-tmp/artifacts
+      - run: |
+          mkdir -p release-out
+          npm pack --pack-destination release-out
+          mv release-out/codex-quietline-*.tgz release-out/codex-quietline.tgz
+          node scripts/collect-release.mjs
+      - name: Publish complete release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release-out/* --verify-tag --generate-notes --title "$GITHUB_REF_NAME"

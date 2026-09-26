@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 //! Session information appears only once all older transcript pages are available.
 
 use super::*;
@@ -10,6 +11,39 @@ use pretty_assertions::assert_eq;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use std::sync::Arc;
+
+#[test]
+fn quietline_replaces_composite_header_and_preserves_startup_notices() {
+    let cell = SessionInfoCell(CompositeHistoryCell {
+        parts: vec![
+            Box::new(SessionHeaderHistoryCell::new(
+                "model".into(),
+                /*reasoning_effort*/ None,
+                /*show_fast_status*/ false,
+                PathBuf::from("/tmp/project"),
+                "test",
+            )),
+            Box::new(PlainHistoryCell::new(vec!["Startup tip".into()])),
+            Box::new(PlainHistoryCell::new(vec![
+                "model changed: fallback".into(),
+            ])),
+        ],
+    });
+    let lines = crate::quietline::startup_lines(&cell, /*width*/ 80);
+    assert_eq!(
+        lines,
+        vec![
+            Line::from("Startup tip"),
+            Line::default(),
+            Line::from("model changed: fallback")
+        ]
+    );
+    insta::assert_snapshot!(lines.iter().map(ToString::to_string).collect::<Vec<_>>().join("\n"), @"
+    Startup tip
+
+    model changed: fallback
+    ");
+}
 
 #[test]
 fn wheel_at_hidden_session_header_keeps_the_loaded_message_anchor() {

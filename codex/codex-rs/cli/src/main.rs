@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: native presentation and distribution integration.
 use clap::Args;
 use clap::CommandFactory;
 use clap::Parser;
@@ -795,13 +796,6 @@ fn run_update_action(
         #[cfg(windows)]
         {
             let (cmd, args) = action.command_args();
-            let cmd = if action == UpdateAction::StandaloneWindows {
-                // These args contain PowerShell metacharacters, so do not let
-                // PATHEXT select a batch shim for this action.
-                "powershell.exe"
-            } else {
-                cmd
-            };
             let path_env =
                 std::env::var_os("PATH").ok_or_else(|| anyhow::anyhow!("PATH is not set"))?;
             let command_path = resolve_windows_update_command_from_path(cmd, &path_env)?;
@@ -845,7 +839,7 @@ fn resolve_windows_update_command_from_path(
         std::env::join_paths(std::env::split_paths(path_env).filter(|path| path.is_absolute()))?;
     if path_env.is_empty() {
         anyhow::bail!(
-            "Could not find an absolute update command `{command}` on PATH. Please update manually: https://developers.openai.com/codex/cli/"
+            "Could not find an absolute update command `{command}` on PATH. Please update manually: https://github.com/BerkayCaglar/codex-quietline#install"
         );
     }
     which::which_in_global(command, Some(&path_env))?
@@ -865,7 +859,7 @@ fn run_update_command() -> anyhow::Result<()> {
     {
         let Some(action) = codex_tui::get_update_action() else {
             anyhow::bail!(
-                "Could not detect the Codex installation method. Please update manually: https://developers.openai.com/codex/cli/"
+                "Could not detect the Codex installation method. Please update manually: https://github.com/BerkayCaglar/codex-quietline#install"
             );
         };
         run_update_action(action, /*cli_executable*/ None)
