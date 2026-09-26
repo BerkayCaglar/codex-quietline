@@ -12,6 +12,7 @@ await prepareNative(values.target);
 const env = { ...process.env, CARGO_INCREMENTAL: '0', CARGO_PROFILE_RELEASE_DEBUG: '0', CARGO_BUILD_JOBS: process.env.CARGO_BUILD_JOBS || '2' };
 const selected = Object.entries(platforms).map(([key, value]) => ({ key, ...value })).find(value => value.triple === values.target);
 if (!selected) throw new Error(`Unsupported build target: ${values.target}`);
+if (selected.releaseLto !== undefined) env.CARGO_PROFILE_RELEASE_LTO ??= String(selected.releaseLto);
 if (values.target.includes('-windows-')) env.LIBSQLITE3_FLAGS ||= 'SQLITE_DISABLE_INTRINSIC';
 if (values.target.includes('-linux-')) {
   env.CODEX_BWRAP_SHA256 = await withUpstreamPayload(selected, ({ payload }) => digest(join(payload, 'codex-resources', 'bwrap')));

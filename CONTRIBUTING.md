@@ -31,6 +31,10 @@ build start. This preparation also normalizes LF for Unix targets.
 
 `npm run build:native -- --target TARGET` builds the native entrypoint. Then:
 
+Intel macOS uses Cargo's normal release optimization without cross-crate LTO to
+fit standard hosted runners. Other targets retain upstream ThinLTO. An explicit
+`CARGO_PROFILE_RELEASE_LTO` overrides the target default for custom builders.
+
 ```sh
 npm run bundle -- --binary /absolute/path/to/built/codex
 ```
