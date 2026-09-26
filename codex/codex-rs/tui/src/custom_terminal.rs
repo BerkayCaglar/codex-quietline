@@ -252,6 +252,13 @@ where
         terminal
     }
 
+    /// Simulate a physical resize in fixed-size UI fixtures, including the backend's size.
+    #[cfg(test)]
+    pub(crate) fn resize_screen_for_test(&mut self, screen_size: Size) -> io::Result<()> {
+        self.screen_size_override = Some(screen_size);
+        self.resize(screen_size)
+    }
+
     /// Get a Frame object which provides a consistent view into the terminal state for rendering.
     pub fn get_frame(&mut self) -> Frame<'_> {
         Frame {
@@ -313,10 +320,6 @@ where
     /// of the screen.
     pub fn resize(&mut self, screen_size: Size) -> io::Result<()> {
         self.last_known_screen_size = screen_size;
-        #[cfg(test)]
-        if let Some(size) = self.screen_size_override.as_mut() {
-            *size = screen_size;
-        }
         Ok(())
     }
 

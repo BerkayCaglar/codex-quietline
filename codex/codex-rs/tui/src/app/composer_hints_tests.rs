@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: synchronize synthetic screen geometry in UI fixtures.
 //! Shared tips remain stable and linked while usage warnings take precedence in the composer gap.
 
 use super::*;
@@ -88,7 +89,7 @@ async fn usage_notice_preserves_composer_geometry_and_restores_tip_on_recovery()
         let mut tui = crate::tui::test_support::make_test_tui()?;
         tui.set_owned_screen(/*owned*/ true)?;
         let size = Size::new(width, height);
-        tui.terminal.resize(size)?;
+        tui.terminal.resize_screen_for_test(size)?;
         let before = app.render_owned_transcript(&mut tui, size)?;
         let cursor = tui.terminal.last_known_cursor_pos;
         let tip = app.composer_hint(width);

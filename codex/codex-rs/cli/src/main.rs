@@ -2725,7 +2725,7 @@ mod tests {
             .strip_prefix(&cwd)
             .expect("decoy directory should be relative to cwd");
 
-        for command in ["npm.cmd", "pnpm.cmd", "bun.exe"] {
+        for command in ["npm.cmd", "pnpm.cmd", "bun.exe", "codex-quietline.cmd"] {
             std::fs::write(decoy_dir.path().join(command), "decoy")
                 .expect("write cwd-relative decoy");
             std::fs::write(trusted_dir.path().join(command), "trusted")
@@ -2755,7 +2755,7 @@ mod tests {
         assert_eq!(
             err.to_string(),
             format!(
-                "Could not find an absolute update command `{command}` on PATH. Please update manually: https://developers.openai.com/codex/cli/"
+                "Could not find an absolute update command `{command}` on PATH. Please update manually: https://github.com/BerkayCaglar/codex-quietline#install"
             )
         );
     }

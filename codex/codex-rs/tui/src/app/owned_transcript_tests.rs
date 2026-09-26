@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: synchronize synthetic screen geometry in UI fixtures.
 //! Owned transcript integration preserves composer spacing/input, prompt editing, and gestures.
 
 use super::*;
@@ -210,7 +211,7 @@ async fn older_page_loading_uses_the_status_row_without_moving_content_or_cursor
     let mut snapshots = Vec::new();
     for width in [80, 40, 28] {
         let size = Size::new(width, /*height*/ 12);
-        tui.terminal.resize(size)?;
+        tui.terminal.resize_screen_for_test(size)?;
         app.transcript_view.history = TranscriptHistoryState::Partial;
         app.render_owned_transcript(&mut tui, size)?;
         app.transcript_view
@@ -292,7 +293,7 @@ async fn recap_spacing_belongs_to_the_transcript_tail() -> Result<()> {
         let mut tui = crate::tui::test_support::make_test_tui()?;
         tui.set_owned_screen(/*owned*/ true)?;
         let size = Size::new(width, height);
-        tui.terminal.resize(size)?;
+        tui.terminal.resize_screen_for_test(size)?;
         let mut snapshot = |app: &mut App, label: &str| -> Result<()> {
             app.render_owned_transcript(&mut tui, size)?;
             let buffer = crate::custom_terminal::test_support::last_rendered_buffer(&tui.terminal);
@@ -352,7 +353,7 @@ async fn owned_transcript_reserves_a_row_above_the_composer() -> Result<()> {
         ("Detailed", 80, 12, "preserved draft"),
     ] {
         let size = Size::new(width, height);
-        tui.terminal.resize(size)?;
+        tui.terminal.resize_screen_for_test(size)?;
         app.chat_widget.apply_external_edit(draft.to_string());
         if label == "Detailed" {
             app.transcript_cells = vec![Arc::new(crate::history_cell::new_view_image_tool_call(
@@ -1141,7 +1142,7 @@ async fn slash_picker_overlays_history_without_moving_the_transcript_or_composer
     tui.set_owned_screen(/*owned*/ true)?;
     for (width, height) in [(80, 14), (32, 14), (80, 7), (80, 5)] {
         let size = Size::new(width, height);
-        tui.terminal.resize(size)?;
+        tui.terminal.resize_screen_for_test(size)?;
         app.chat_widget.apply_external_edit("/m".to_string());
         app.chat_widget
             .handle_key_event(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE));

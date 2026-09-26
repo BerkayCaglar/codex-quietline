@@ -41,3 +41,24 @@ does not use an account or consume model usage.
 
 Raw runs are retained under ignored `.agent-tmp/`. The release review records final
 test counts, native interaction evidence and CI/release links after verification.
+
+## Local release verification
+
+The third full Windows run passed 5,864 cases; the remaining two assertions and
+one timeout were fixed and covered by a normal 61-case regression run, all passing.
+The full run had no retries that later passed; it reported 308 leaky-handle cases.
+Raw failed runs remain available locally and are not presented as passing runs.
+Scoped Clippy and repository formatting both completed successfully.
+
+Real native PTY interaction verified slash/model menus, the post-initialization
+welcome, child visibility, navigation in both directions and interrupting a
+running child. The test agent only performed timed waits. The acceptance sessions
+shut down normally, without replacing the shared daemon.
+
+The sandbox fixture now owns its writable temporary directory. Its previous host
+TEMP behavior was diagnosed using capability records and sandbox logs, and the
+isolated test passed in 1.1 seconds. Recovery of the failed local fixture grants
+uses only their attributable capability identities and retained ACL evidence.
+
+Release CI enforces success on the exact source commit before publication. Each
+release publishes `validation.json` with that commit and successful CI run URL.

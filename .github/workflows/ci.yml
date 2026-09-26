@@ -45,7 +45,7 @@ jobs:
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
           sudo apt-get update -qq
-          sudo apt-get install -y pkg-config libssl-dev cmake clang
+          sudo apt-get install -y pkg-config libssl-dev cmake clang bubblewrap
       - run: rustup toolchain install 1.95.0 --profile minimal --component rustfmt
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:

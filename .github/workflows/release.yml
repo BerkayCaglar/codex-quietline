@@ -25,6 +25,8 @@ jobs:
           run_id=$(gh run list --workflow ci.yml --commit "$GITHUB_SHA" --event push --status success --json databaseId --jq '.[0].databaseId')
           test -n "$run_id" && test "$run_id" != null
           gh run download "$run_id" --pattern 'native-*' --dir .agent-tmp/artifacts
+          mkdir -p release-out
+          gh run view "$run_id" --json headSha,url,conclusion > release-out/validation.json
       - run: |
           mkdir -p release-out
           npm pack --pack-destination release-out
