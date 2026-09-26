@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: unify project trust lookup while retaining legacy path spellings.
 mod application;
 mod layer_io;
 mod local;
@@ -1374,7 +1375,7 @@ pub fn project_trust_key(path: &Path) -> String {
         .unwrap_or_else(|| normalize_project_trust_lookup_key(path.to_string_lossy().to_string()))
 }
 
-/// Returns canonical and original path spellings in trust-lookup precedence order.
+/// Returns canonical path spellings before the original path spelling.
 pub fn normalized_project_trust_keys(path: &Path) -> Vec<String> {
     let normalized_path = normalize_project_trust_lookup_key(path.to_string_lossy().to_string());
     let normalized_canonical_path = normalize_project_trust_lookup_key(
@@ -1383,14 +1384,21 @@ pub fn normalized_project_trust_keys(path: &Path) -> Vec<String> {
             .to_string_lossy()
             .to_string(),
     );
-    if normalized_path == normalized_canonical_path {
-        vec![normalized_canonical_path]
-    } else {
-        vec![normalized_canonical_path, normalized_path]
+    let mut keys = vec![normalized_canonical_path];
+    // Keep existing verbatim Windows and WSL comparison keys readable after unifying lookup.
+    if let Ok(comparison_path) = codex_utils_path::normalize_for_path_comparison(path) {
+        let key = normalize_project_trust_lookup_key(comparison_path.to_string_lossy().to_string());
+        if !keys.contains(&key) {
+            keys.push(key);
+        }
     }
+    if !keys.contains(&normalized_path) {
+        keys.push(normalized_path);
+    }
+    keys
 }
 
-fn normalize_project_trust_lookup_key(key: String) -> String {
+pub(crate) fn normalize_project_trust_lookup_key(key: String) -> String {
     if cfg!(windows) {
         key.to_ascii_lowercase()
     } else {

@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: share canonical project identity with the trust writer.
 //! Schema-heavy configuration TOML types used by Codex.
 
 use std::collections::BTreeMap;
@@ -8,6 +9,8 @@ use std::path::Path;
 use crate::HooksToml;
 use crate::browser_use::BrowserUseConfigToml;
 use crate::computer_use::ComputerUseConfigToml;
+use crate::loader::normalize_project_trust_lookup_key as normalize_project_lookup_key;
+use crate::loader::normalized_project_trust_keys as normalized_project_lookup_keys;
 use crate::permissions_toml::PermissionsToml;
 use crate::profile_toml::ConfigProfile;
 use crate::types::AnalyticsConfigToml;
@@ -55,7 +58,6 @@ use codex_protocol::openai_models::ReasoningEffort;
 use codex_protocol::permissions::NetworkSandboxPolicy;
 use codex_protocol::protocol::AskForApproval;
 use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path::normalize_for_path_comparison;
 use codex_utils_path_uri::Platform;
 use schemars::JsonSchema;
 use serde::Deserialize;
@@ -888,32 +890,6 @@ impl ConfigToml {
     }
 }
 
-/// Canonicalize the path and convert it to a string to be used as a key in the
-/// projects trust map. On Windows, strips UNC, when possible, to try to ensure
-/// that different paths that point to the same location have the same key.
-fn normalized_project_lookup_keys(path: &Path) -> Vec<String> {
-    let normalized_path = normalize_project_lookup_key(path.to_string_lossy().to_string());
-    let normalized_canonical_path = normalize_project_lookup_key(
-        normalize_for_path_comparison(path)
-            .unwrap_or_else(|_| path.to_path_buf())
-            .to_string_lossy()
-            .to_string(),
-    );
-    if normalized_path == normalized_canonical_path {
-        vec![normalized_canonical_path]
-    } else {
-        vec![normalized_canonical_path, normalized_path]
-    }
-}
-
-fn normalize_project_lookup_key(key: String) -> String {
-    if cfg!(windows) {
-        key.to_ascii_lowercase()
-    } else {
-        key
-    }
-}
-
 fn project_config_for_lookup_key(
     projects: &HashMap<String, ProjectConfig>,
     lookup_key: &str,
@@ -1019,6 +995,10 @@ pub fn validate_oss_provider(provider: &str) -> std::io::Result<()> {
         )),
     }
 }
+
+#[cfg(test)]
+#[path = "project_trust_tests.rs"]
+mod project_trust_tests;
 
 #[cfg(test)]
 mod tests {

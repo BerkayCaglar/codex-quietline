@@ -1,5 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync, writeFileSync } from 'node:fs';
+import { EventEmitter } from 'node:events';
 import { mkdtemp, mkdir, readFile, writeFile, rm, readdir, symlink, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -7,7 +9,7 @@ import { c as create } from 'tar';
 import { inside, metadata, nativeVersion, target } from '../lib/config.mjs';
 import { ensureInstalled, digest, validateBundle } from '../lib/install.mjs';
 import { activate, deactivate, shellBlock, removeShellBlock, windowsPathScript } from '../lib/activate.mjs';
-import { upgradeCommands, isNewerRelease } from '../lib/upgrade.mjs';
+import { upgrade, upgradeCommands, isNewerRelease } from '../lib/upgrade.mjs';
 import { migrationBytes, prepareNative } from '../scripts/prepare-native.mjs';
 
 async function temporary(t) {
@@ -145,4 +147,28 @@ test('migration preparation excludes build outputs', async t => {
   assert.equal(await prepareNative('x86_64-pc-windows-msvc', root), 1);
   assert.equal(await readFile(join(root, 'state', 'migration.sql'), 'utf8'), sql.replaceAll('\n', '\r\n'));
   assert.equal(await readFile(join(root, 'target', 'generated.sql'), 'utf8'), sql);
+});
+
+test('upgrades isolate their working directory and clean it on success or failure', async () => {
+  for (const failFirst of [false, true]) {
+    const calls = [];
+    const run = upgrade({
+      fetchRelease: async () => ({ ok: true, json: async () => ({ tag_name: 'v9.9.9' }) }),
+      spawnCommand: (command, args, options) => {
+        assert.notEqual(options.cwd, process.cwd());
+        assert.equal(existsSync(options.cwd), true);
+        assert.equal(existsSync(join(options.cwd, 'package.json')), true);
+        inside(tmpdir(), options.cwd);
+        writeFileSync(join(options.cwd, 'owned-marker'), 'temporary');
+        calls.push({ command, args, cwd: options.cwd });
+        const child = new EventEmitter();
+        queueMicrotask(() => child.emit('exit', failFirst ? 1 : 0));
+        return child;
+      },
+    });
+    if (failFirst) await assert.rejects(run, /npm failed/);
+    else await run;
+    assert.equal(calls.length, failFirst ? 1 : 3);
+    for (const call of calls) assert.equal(existsSync(call.cwd), false);
+  }
 });

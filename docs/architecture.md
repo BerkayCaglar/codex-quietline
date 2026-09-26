@@ -20,6 +20,12 @@ history or model context. Owned-screen rendering keeps the native bottom pane an
 footer composition. Inline mode uses native resize reflow when leaving the fresh
 full-height viewport. Modals and command popups retain their own rendering/input.
 
+Project configuration and its trust writer share the native loader's path-key
+normalization. Current canonical keys take precedence, followed by legacy
+canonical forms and original aliases. This preserves existing records while
+recognizing Windows short and verbatim spellings of the same directory. Trust
+levels, schema fields and execution-policy defaults are unchanged.
+
 ## Distribution
 
 The bootstrap passes arguments and inherited stdio to the native entrypoint.

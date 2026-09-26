@@ -10,7 +10,7 @@ handling in native Codex. Do not recreate these in the Node bootstrap.
 - Bootstrap: `npm ci` and `npm run check` (no model calls).
 - Native: Rust 1.95.0, C/C++ build tools, `just`, `cargo-nextest`, and `cargo-insta`.
 - Linux native sandbox integration tests also require `bubblewrap` on PATH.
-- From the root: `npm run test:native -- -p codex-tui -p codex-cli --cargo-profile dev-small`.
+- From the root: `npm run test:native -- -p codex-config -p codex-tui -p codex-cli --cargo-profile dev-small`.
   This prepares embedded SQL bytes and invokes upstream `just test` with a generic
   ANSI terminal environment. Windows debug test threads receive a 16 MiB stack.
   Two tests run concurrently by default; pass `--test-threads N` to change this.

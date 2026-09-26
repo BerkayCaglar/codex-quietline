@@ -1,3 +1,4 @@
+// Modified for Codex Quietline: normalize all native spellings of the diagnostic fixture root.
 //! Black-box coverage for safe diagnostic execution and config error reporting.
 
 use std::ffi::OsString;
@@ -32,6 +33,16 @@ struct Fixture {
 }
 
 impl Fixture {
+    fn normalize_paths(&self, text: &str) -> Result<String> {
+        let canonical = self.root.path().canonicalize()?;
+        let native = codex_utils_path::normalize_for_native_workdir(&canonical);
+        let mut normalized = text.to_string();
+        for root in [canonical.as_path(), native.as_path(), self.root.path()] {
+            normalized = normalized.replace(root.to_string_lossy().as_ref(), "FIXTURE");
+        }
+        Ok(normalized.replace('\\', "/"))
+    }
+
     fn new() -> Result<Self> {
         let root = TempDir::new()?;
         // Cargo-built paths deliberately ignore npm provenance. Launch outside
@@ -381,14 +392,7 @@ fn doctor_reports_only_safe_config_error_metadata() -> Result<()> {
                 .expect("config check")
                 .remove("durationMs");
             if let Some(file) = check["details"]["file"].as_str() {
-                check["details"]["file"] = Value::String(
-                    file.replace(
-                        &fixture.root.path().canonicalize()?.display().to_string(),
-                        "FIXTURE",
-                    )
-                    .replace(&fixture.root.path().display().to_string(), "FIXTURE")
-                    .replace('\\', "/"),
-                );
+                check["details"]["file"] = Value::String(fixture.normalize_paths(file)?);
             }
             let stdout = String::from_utf8_lossy(&output.stdout);
             assert!(!stdout.contains("doctor-test-credential"));
@@ -435,14 +439,8 @@ extends = ":read-only"
         .as_object_mut()
         .expect("path details")
         .retain(|key, _| !key.ends_with(" latency"));
-    let canonical_root = fixture.root.path().canonicalize()?;
     for value in details.as_object_mut().expect("path details").values_mut() {
-        let detail = value
-            .as_str()
-            .expect("scalar path detail")
-            .replace(&canonical_root.display().to_string(), "FIXTURE")
-            .replace(&fixture.root.path().display().to_string(), "FIXTURE")
-            .replace('\\', "/");
+        let detail = fixture.normalize_paths(value.as_str().expect("scalar path detail"))?;
         *value = Value::String(detail);
     }
     let snapshot_name = if cfg!(windows) {

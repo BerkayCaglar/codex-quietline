@@ -74,3 +74,4 @@ jobs:
           name: native-${{ matrix.key }}
           path: release-out/*
           if-no-files-found: error
+          compression-level: 0

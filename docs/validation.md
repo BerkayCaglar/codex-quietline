@@ -5,7 +5,7 @@
 ```sh
 npm ci
 npm run check
-npm run test:native -- -p codex-tui -p codex-cli --cargo-profile dev-small
+npm run test:native -- -p codex-config -p codex-tui -p codex-cli --cargo-profile dev-small
 ```
 
 Use `npm run build:native` from the root for release builds. Follow CONTRIBUTING.md
@@ -59,6 +59,18 @@ The sandbox fixture now owns its writable temporary directory. Its previous host
 TEMP behavior was diagnosed using capability records and sandbox logs, and the
 isolated test passed in 1.1 seconds. Recovery of the failed local fixture grants
 uses only their attributable capability identities and retained ACL evidence.
+
+The four failed-test identities were removed from the surviving inventoried
+objects. Cleanup verified 303,278 surviving descriptors against the retained
+baseline, including every non-test ACE, owner, group and inheritance flag. Three
+baseline temporary files had already disappeared. A flagged inheritance-marker
+difference was restored and verified before cleanup resumed. Raw inventory,
+failed probes, repair records and verification remain local; none is packaged.
+
+An actual Windows 8.3 temporary path exposed the hosted runner's trust-identity
+failure locally. The corrected shared normalizer passed all 348 configuration
+tests plus nine CLI/TUI regressions (356 + 1 checks). Current writer keys retain
+precedence over legacy canonical entries, which precede original aliases.
 
 Release CI enforces success on the exact source commit before publication. Each
 release publishes `validation.json` with that commit and successful CI run URL.

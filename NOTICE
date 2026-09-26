@@ -7,5 +7,6 @@ Copyright (c) 2023-2025 The Ratatui Developers
 
 Codex Quietline
 Copyright 2026 Berkay Caglar
-This distribution modifies the native Codex terminal presentation and update integration.
+This distribution modifies the native Codex terminal presentation, update integration,
+and project-path compatibility.
 The upstream source revision is recorded in upstream.json. Original notices are retained under codex/.
