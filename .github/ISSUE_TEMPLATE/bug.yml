@@ -1,0 +1,17 @@
+name: Bug report
+description: Report a reproducible problem
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include expected behavior and reproduction steps. Remove secrets from output.
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions and environment
+      description: Quietline, Codex, Node.js, operating system and terminal
+    validations:
+      required: true
