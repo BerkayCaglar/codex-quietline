@@ -12,10 +12,13 @@ use the same `/` menu, and keep real subagents visible under the composer.
 
 - A centered, static Quietline mark and welcome on a fresh conversation.
 - A persistent strip of subagents, with native labels, working/idle/closed status,
-  and the selected conversation highlighted.
+  and the selected conversation highlighted. In the full-screen TUI, hovering
+  highlights a row and clicking it opens that agent's native conversation.
 - `Alt+↑` / `Alt+↓` to use native agent switching. Original `Alt+←` / `Alt+→`
   shortcuts and `/subagents` remain available. Fast switching follows Codex's
   empty-composer rule, preserving editing shortcuts while a draft exists.
+  VS Code's integrated terminal sends `Ctrl+arrow` sequences for `Alt+arrow`;
+  Quietline accepts those sequences for the same switching action.
 - The main session's model and context stay in Codex's existing status line.
   There is no duplicate Main row; the strip is hidden when there are no children.
 

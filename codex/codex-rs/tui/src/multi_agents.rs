@@ -120,6 +120,9 @@ pub(crate) fn previous_agent_shortcut_matches(
 ) -> bool {
     previous_agent_shortcut().is_press(key_event)
         || crate::key_hint::alt(KeyCode::Up).is_press(key_event)
+        // VS Code's integrated terminal sends Ctrl+arrow sequences for Alt+arrow keys.
+        || crate::key_hint::ctrl(KeyCode::Left).is_press(key_event)
+        || crate::key_hint::ctrl(KeyCode::Up).is_press(key_event)
         || previous_agent_word_motion_fallback(key_event, allow_word_motion_fallback)
 }
 
@@ -131,6 +134,8 @@ pub(crate) fn next_agent_shortcut_matches(
 ) -> bool {
     next_agent_shortcut().is_press(key_event)
         || crate::key_hint::alt(KeyCode::Down).is_press(key_event)
+        || crate::key_hint::ctrl(KeyCode::Right).is_press(key_event)
+        || crate::key_hint::ctrl(KeyCode::Down).is_press(key_event)
         || next_agent_word_motion_fallback(key_event, allow_word_motion_fallback)
 }
 

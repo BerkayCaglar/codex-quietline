@@ -2310,6 +2310,19 @@ impl BottomPane {
         }
     }
 
+    pub(crate) fn quietline_agent_at(
+        &self,
+        position: ratatui::layout::Position,
+    ) -> Option<ThreadId> {
+        self.quietline_agents.agent_at(position)
+    }
+
+    pub(crate) fn set_quietline_hovered(&mut self, position: Option<ratatui::layout::Position>) {
+        if self.quietline_agents.set_hovered(position) {
+            self.request_redraw();
+        }
+    }
+
     pub(crate) fn quietline_agents_renderable(&self) -> RenderableItem<'_> {
         RenderableItem::Borrowed(&self.quietline_agents)
     }

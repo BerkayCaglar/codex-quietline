@@ -1054,6 +1054,13 @@ impl App {
             _ => {}
         }
 
+        if self
+            .handle_quietline_pointer_event(tui, app_server, &event)
+            .await?
+        {
+            return Ok(AppRunControl::Continue);
+        }
+
         if self.overlay.is_some() {
             let _ = self
                 .handle_backtrack_overlay_event(tui, app_server, event)

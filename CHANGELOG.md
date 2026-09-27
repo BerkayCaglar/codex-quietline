@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1 — Agent navigation
+
+- Accept VS Code's Ctrl+Up/Down terminal sequences for native subagent navigation,
+  alongside Alt+Up/Down.
+- Highlight visible subagents on hover and open their conversations with a click.
+- Keep modal and overlay mouse handling ahead of the agent strip.
+
 ## 0.2.0 — Native CLI
 
 - Replace the independent TypeScript client with the native Codex CLI fork.

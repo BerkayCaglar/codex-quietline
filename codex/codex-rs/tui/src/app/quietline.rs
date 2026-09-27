@@ -4,6 +4,9 @@ use super::*;
 use crate::empty_state_animation::Presentation;
 use crate::motion::MotionMode;
 use crate::quietline::AgentRow;
+use crossterm::event::MouseButton;
+use crossterm::event::MouseEventKind;
+use ratatui::layout::Position;
 use ratatui::widgets::Widget;
 
 impl App {
@@ -16,6 +19,7 @@ impl App {
             .into_iter()
             .filter(|(id, _)| Some(*id) != self.primary_thread_id)
             .map(|(id, entry)| AgentRow {
+                thread_id: id,
                 label: entry
                     .agent_path
                     .as_deref()
@@ -33,6 +37,45 @@ impl App {
             })
             .collect();
         self.chat_widget.set_quietline_agents(rows);
+    }
+
+    pub(super) async fn handle_quietline_pointer_event(
+        &mut self,
+        tui: &mut tui::Tui,
+        app_server: &mut AppServerSession,
+        event: &TuiEvent,
+    ) -> Result<bool> {
+        if !tui.is_owned_screen()
+            || self.overlay.is_some()
+            || !self.chat_widget.no_modal_or_popup_active()
+        {
+            self.chat_widget.set_quietline_hovered(None);
+            return Ok(false);
+        }
+        let TuiEvent::Mouse(mouse) = event else {
+            if matches!(event, TuiEvent::FocusLost) {
+                self.chat_widget.set_quietline_hovered(None);
+            }
+            return Ok(false);
+        };
+        let position = Position::new(mouse.column, mouse.row);
+        if matches!(
+            mouse.kind,
+            MouseEventKind::Moved | MouseEventKind::Down(MouseButton::Left)
+        ) {
+            self.chat_widget.set_quietline_hovered(Some(position));
+        }
+        if mouse.kind == MouseEventKind::Down(MouseButton::Left)
+            && let Some(thread_id) = self.chat_widget.quietline_agent_at(position)
+        {
+            if self.current_displayed_thread_id() != Some(thread_id) {
+                let _ = self
+                    .select_agent_thread_and_discard_side(tui, app_server, thread_id)
+                    .await;
+            }
+            return Ok(true);
+        }
+        Ok(false)
     }
 
     /// Use the native freshness latch; submitting, resuming, and modal ownership keep their rules.

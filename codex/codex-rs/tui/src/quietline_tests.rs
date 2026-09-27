@@ -33,6 +33,7 @@ fn quietline_strip_keeps_selected_agent_visible_without_a_main_row() {
     strip.set_rows(
         (0..7)
             .map(|index| AgentRow {
+                thread_id: ThreadId::new(),
                 label: format!("review/task_{index}"),
                 running: index == 6,
                 closed: index == 3,
@@ -56,6 +57,53 @@ fn quietline_strip_keeps_selected_agent_visible_without_a_main_row() {
 }
 
 #[test]
+fn quietline_strip_hover_and_hit_testing_follow_the_rendered_rows() {
+    let thread_ids: Vec<_> = (0..7).map(|_| ThreadId::new()).collect();
+    let mut strip = AgentStrip::default();
+    strip.set_rows(
+        thread_ids
+            .iter()
+            .enumerate()
+            .map(|(index, thread_id)| AgentRow {
+                thread_id: *thread_id,
+                label: format!("task_{index}"),
+                running: false,
+                closed: false,
+                selected: index == 6,
+            })
+            .collect(),
+    );
+    let area = Rect::new(
+        /*x*/ 2,
+        /*y*/ 3,
+        /*width*/ 80,
+        strip.desired_height(80),
+    );
+    let mut buffer = Buffer::empty(Rect::new(
+        /*x*/ 0, /*y*/ 0, /*width*/ 84, /*height*/ 10,
+    ));
+    strip.render(area, &mut buffer);
+
+    assert_eq!(
+        strip.agent_at(ratatui::layout::Position::new(2, 3)),
+        Some(thread_ids[3])
+    );
+    assert_eq!(
+        strip.agent_at(ratatui::layout::Position::new(81, 6)),
+        Some(thread_ids[6])
+    );
+    assert_eq!(strip.agent_at(ratatui::layout::Position::new(2, 7)), None);
+    assert_eq!(strip.agent_at(ratatui::layout::Position::new(1, 4)), None);
+    assert!(strip.set_hovered(Some(ratatui::layout::Position::new(4, 4))));
+    assert!(!strip.set_hovered(Some(ratatui::layout::Position::new(4, 4))));
+
+    strip.render(area, &mut buffer);
+    assert_snapshot!("quietline_agents_hover", text(&buffer));
+    assert!(strip.set_hovered(None));
+    assert!(!strip.set_hovered(None));
+}
+
+#[test]
 fn quietline_shortcuts_reuse_native_navigation() {
     use crossterm::event::KeyCode;
     use crossterm::event::KeyEvent;
@@ -68,6 +116,26 @@ fn quietline_shortcuts_reuse_native_navigation() {
         KeyEvent::new(KeyCode::Down, KeyModifiers::ALT),
         /*allow_word_motion_fallback*/ false,
     ));
+    for (key, previous) in [
+        (KeyCode::Left, true),
+        (KeyCode::Up, true),
+        (KeyCode::Right, false),
+        (KeyCode::Down, false),
+    ] {
+        let event = KeyEvent::new(key, KeyModifiers::CONTROL);
+        assert_eq!(
+            crate::multi_agents::previous_agent_shortcut_matches(
+                event, /*allow_word_motion_fallback*/ false,
+            ),
+            previous,
+        );
+        assert_eq!(
+            crate::multi_agents::next_agent_shortcut_matches(
+                event, /*allow_word_motion_fallback*/ false,
+            ),
+            !previous,
+        );
+    }
     assert!(!crate::multi_agents::next_agent_shortcut_matches(
         KeyEvent::new(KeyCode::Down, KeyModifiers::NONE),
         /*allow_word_motion_fallback*/ false,
@@ -80,6 +148,7 @@ fn quietline_main_view_keeps_a_running_child_in_the_strip() {
     strip.set_rows(
         (0..7)
             .map(|index| AgentRow {
+                thread_id: ThreadId::new(),
                 label: format!("task_{index}"),
                 running: index == 6,
                 closed: index < 6,

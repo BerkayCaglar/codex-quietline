@@ -1,0 +1,12 @@
+---
+source: tui/src/quietline_tests.rs
+expression: text(&buffer)
+---
+
+
+
+    task_3 · idle
+  → task_4 · idle
+    task_5 · idle
+  › task_6 · idle
+    4–7 / 7 agents · Alt+↑/↓ · /subagents

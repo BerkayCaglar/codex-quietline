@@ -272,6 +272,7 @@ async fn quietline_agent_strip_survives_read_only_views() {
         let (mut widget, _sender, _events, _operations) =
             make_chatwidget_manual_with_sender().await;
         widget.set_quietline_agents(vec![crate::quietline::AgentRow {
+            thread_id: ThreadId::new(),
             label: "Survey [explorer]".to_string(),
             running: true,
             closed: false,

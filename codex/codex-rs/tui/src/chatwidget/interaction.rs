@@ -25,6 +25,17 @@ impl ChatWidget {
         self.bottom_pane.prepare_composer_mouse(event)
     }
 
+    pub(crate) fn quietline_agent_at(
+        &self,
+        position: ratatui::layout::Position,
+    ) -> Option<ThreadId> {
+        self.bottom_pane.quietline_agent_at(position)
+    }
+
+    pub(crate) fn set_quietline_hovered(&mut self, position: Option<ratatui::layout::Position>) {
+        self.bottom_pane.set_quietline_hovered(position);
+    }
+
     pub(crate) fn set_agents_navigation_enabled(&mut self, enabled: bool) {
         self.bottom_pane.set_agents_navigation_enabled(enabled);
     }

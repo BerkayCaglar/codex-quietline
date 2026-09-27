@@ -74,3 +74,36 @@ precedence over legacy canonical entries, which precede original aliases.
 
 Release CI enforces success on the exact source commit before publication. Each
 release publishes `validation.json` with that commit and successful CI run URL.
+
+## VS Code agent navigation follow-up
+
+VS Code's integrated terminal maps Alt+arrow keys to Ctrl+arrow escape sequences
+while the terminal has focus. Quietline's agent switch matcher previously accepted
+only Alt+arrow events, so the on-screen hint could fail in VS Code. The matcher
+now accepts the Ctrl+arrow sequences through the same native navigation path;
+the empty-composer and modal priority rules remain in App input routing.
+
+`node scripts/prepare-native.mjs` prepared the target SQL bytes (0 files changed).
+`npm run check` passed (14 tests passed, 1 skipped). The focused TUI shortcut test
+passed, followed by `just test -p codex-tui` via the native test wrapper: 5,416
+passed, 9 skipped, with 308 existing leaky-handle reports. `cargo insta
+pending-snapshots --manifest-path tui/Cargo.toml` found no pending snapshots.
+The first two native test invocations could not find the local Python and
+PowerShell binaries; setting their paths allowed the tests to run. A live VS Code
+terminal interaction remains to be checked on an installed build.
+
+## Clickable agent strip follow-up
+
+The strip now retains the rendered row area and native thread IDs for hit testing.
+Mouse hover highlights only a visible agent row; a left click uses App's existing
+agent selection path. Open overlays and bottom-pane dialogs retain mouse priority.
+The integration test also selects an agent while a composer draft exists.
+
+Source SQL preparation changed 0 files. The focused Quietline run passed 10
+tests after accepting the reviewed hover snapshot. The full `codex-tui` run
+passed 5,418 tests, with 9 skipped and 293 leaky-handle reports. `npm run check`
+passed 14 bootstrap tests with 1 skipped. Initial focused compilation failed on
+an ambiguous test macro import; the correction and all subsequent runs are
+retained under ignored `.agent-tmp/`. The scoped `just fix -p codex-tui` and
+repository `just fmt` both completed. Live pointer interaction in VS Code remains
+to be checked on an installed build.
