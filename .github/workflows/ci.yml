@@ -62,10 +62,10 @@ jobs:
             ~/.cargo/bin/cargo-nextest*
             .test-target
           key: tests-${{ runner.os }}-${{ hashFiles('codex/codex-rs/Cargo.lock') }}
-      - uses: taiki-e/install-action@44c6d64aa62cd779e873306675c7a58e86d6d532
+      - uses: taiki-e/install-action@4cef1412cce204788f482e778a0b9187f9626a29
         with:
           tool: just@1.58.0
-      - uses: taiki-e/install-action@44c6d64aa62cd779e873306675c7a58e86d6d532
+      - uses: taiki-e/install-action@4cef1412cce204788f482e778a0b9187f9626a29
         with:
           tool: cargo-nextest@0.9.146
       - run: npm ci
