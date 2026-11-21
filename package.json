@@ -44,6 +44,6 @@
   },
   "dependencies": {
     "cross-spawn": "7.0.6",
-    "tar": "7.5.22"
+    "tar": "7.5.23"
   }
 }
